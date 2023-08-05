@@ -1,0 +1,19 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 2rem;
+}
+.game {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+button {
+  padding: 1em 2em;
+  margin: 1em auto;
+}
+.select-language {
+  margin: 1em auto;
+}
