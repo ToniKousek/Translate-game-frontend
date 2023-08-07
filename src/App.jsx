@@ -1,6 +1,4 @@
-import { useState } from "react";
-import Popup from "reactjs-popup";
-import "reactjs-popup/dist/index.css";
+import { useEffect, useState } from "react";
 
 import "./App.css";
 import GameForm from "./GameForm";
@@ -15,11 +13,25 @@ function App() {
 
   const [lives, setLives] = useState(3);
   const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
   const [popUpData, setPopUpData] = useState({
     wasSuccess: false,
     correctLanguage: "",
     openPopUp: false,
+    // the other data that needs to be displayed
+    otherData: "",
   });
+
+  // on reload
+  useEffect(() => {
+    const localHighScore = window.localStorage.getItem("HIGHSCORE");
+    console.log(localHighScore);
+    if (localHighScore !== null) {
+      setHighScore(JSON.parse(localHighScore));
+      console.log("setting", localHighScore);
+      console.log("to", highScore);
+    }
+  }, []);
 
   function successOrFail(value, correctLanguage) {
     switch (value) {
@@ -38,6 +50,28 @@ function App() {
 
       // fail
       case 1:
+        let otherData;
+
+        let newHighScore = highScore;
+        const newLives = lives - 1;
+        setLives(newLives);
+        if (newLives === 0) {
+          // reset
+
+          if (score > highScore) {
+            newHighScore = score;
+            setHighScore(newHighScore);
+            console.log("new high score", newHighScore);
+            localStorage.setItem("HIGHSCORE", JSON.stringify(newHighScore));
+          }
+          setLives(3);
+          setScore(0);
+          otherData = `<p>New game!</p>Your score was ${score}!<br />High Score is ${newHighScore}!`;
+          // alert(
+          //   `New game!\nYour score was ${score}!\nHigh Score is ${newHighScore}`
+          // );
+        }
+
         setPopUpData({
           openPopUp: true,
           // because the values of {supportedLanguages} are not the code type, but {correctLanguage} is
@@ -45,16 +79,8 @@ function App() {
             (key) => supportedLanguages[key] === correctLanguage
           ),
           wasSuccess: false,
+          otherData: otherData,
         });
-        const newLives = lives - 1;
-        setLives(newLives);
-
-        if (newLives === 0) {
-          // reset
-          setLives(3);
-          setScore(0);
-          alert("New game!");
-        }
         break;
     }
   }
@@ -62,12 +88,12 @@ function App() {
   return (
     <>
       <Header lives={lives} score={score} />
+      <PopUp popUpData={popUpData} setPopUpData={setPopUpData} />
       <GameForm
         sentences={sentences}
         languages={supportedLanguages}
         successOrFail={successOrFail}
       />
-      <PopUp popUpData={popUpData} setPopUpData={setPopUpData} />
     </>
   );
 }
